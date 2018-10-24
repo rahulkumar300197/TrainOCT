@@ -4,24 +4,20 @@ var http = require('http').Server(app);
 var io = require('socket.io')(http);
 
 app.get('/', function(req, res){
-  console.log("aaaaa");
   res.sendFile(__dirname + '/index.html');
 });
 
+var chunks = [];
 
 io.on('connection', function(socket){
-    var readStream = fs.createReadStream(__dirname+'/file.jpg',{
-      encoding: 'binary'
+    socket.on("send-chunk",function (chunk) {
+      chunks.push(chunk);
     });
-    readStream.on('data', function(chunk){
-      // setTimeout(function(){
-      //   socket.emit('data-chunk',chunk);
-      // },5000)
-      socket.emit('data-chunk',chunk);
-
+    socket.on("send-chunk-completed",function (extention) {
+    fs.writeFile('./file'+"."+extention,chunks.join(""),{encoding: 'base64'},function(err){
+      //console.log("DONE");
+      socket.emit('upload-completed')
     });
-    readStream.on('end', function(){
-      socket.emit('completed',"END");
     });
 });
 

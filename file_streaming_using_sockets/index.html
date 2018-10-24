@@ -1,24 +1,44 @@
 <!doctype html>
 <html>
-  <body>  
-    <img id="image", src="">
-    <script src="/socket.io/socket.io.js"></script>
-    <script src="https://code.jquery.com/jquery-1.11.1.js"></script>
-    <script>
-      var socket = io.connect("http://localhost:5000");
-      var chunks = [];
-      var i= 0;
-      socket.on('data-chunk', function(data) {
-        chunks.push(data);
-        //$('#data').append($('<li>').text(data));
-         var image = document.getElementById('image');
-        image.setAttribute('src', 'data:image/jpeg;base64,' +  window.btoa(chunks));
-        console.log("iii",i++)        
-      });
-      socket.on('completed', function(data) {
-        //save file logic        
-        console.log("COMPLETED")
-      });
-    </script>
-  </body>
+
+<body>
+  <img id="image" , src="">
+  <input type='file' accept='file/*' onchange='openFile(event)'><br>
+  <script src="/socket.io/socket.io.js"></script>
+  <script>
+    var socket = io.connect("http://localhost:5000");
+    socket.on("upload-completed", function(data) {
+      alert("File uploded Succesfully !!");
+    });
+    var text;
+    var openFile = function (event) {
+      var input = event.target;
+      var reader = new FileReader();
+      reader.onload = function () {
+        text = reader.result;
+        //console.log('rrrrr',reader);
+        text = text.split("data:image/jpeg;base64,")[1]; 
+        //console.log("length",text.length);
+        createChunkAndSend(text);
+      };
+      reader.readAsDataURL(input.files[0]);
+      //createChunkAndSend(text);
+    };
+    function createChunkAndSend(data) {
+      var total_chunks = Math.ceil(data.length / 5000);
+      var start = 0, end = 0;
+      for (var i = 0; i < data.length; i += 5000) {
+        start = i, end = start + 5000;
+        if (end > data.length) {
+          end = data.length;
+        }
+        //console.log(start, " ", end);
+        socket.emit("send-chunk", data.substring(start, end));
+      }
+      socket.emit("send-chunk-completed","jpg");
+    }
+    
+  </script>
+</body>
+
 </html>
