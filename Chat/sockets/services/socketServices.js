@@ -22,7 +22,7 @@ function get_redis_client_users (input, callback) {
 function insert_into_redis_users (key, value) {
     getRedis(function (resp) {
         redis_client.set(allUserSockets + key, JSON.stringify(value));
-        redis_client.expire(allUserSockets + key, 7200);
+        //redis_client.expire(allUserSockets + key, 7200);
     });
 };
 
@@ -38,6 +38,7 @@ function delete_client_user(key) {
 };
 
 function getRedis(callback) {
+    console.log("rrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrr");
     if (redis_client === undefined) {
         redis_client = redis.createClient(properties.databaseSettings.redis.port, properties.databaseSettings.redis.host);
         redis_client.on('connect', function () {
@@ -49,4 +50,10 @@ function getRedis(callback) {
 
 function getSocketID(data) {
     return data.split('USER')[1]
+}
+
+function getKeys(input, callback) {
+    redis_client.keys(input, function (error, keys) {
+        callback(error, keys)
+    })
 }

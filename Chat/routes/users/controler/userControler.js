@@ -14,6 +14,8 @@ exports.accessTokenLogin           =            accessTokenLogin;
 exports.getAllMessages             =            getAllMessages;
 exports.getAllUsers                =            getAllUsers;
 exports.getIndex                   =            getIndex;
+exports.getSignupPage              =            getSignupPage;
+exports.getLoginPage               =            getLoginPage;
 
 function userLogin(req, res) {
     Promise.coroutine(function* () {
@@ -85,8 +87,8 @@ function  userSignup(req,res) {
         var accessToken = commonFunctions.generateAccessToken();        
         yield userServices.createUserSession({user_id: createUser.insertId, access_token: accessToken});
 
-        delete userDetails[0].password;
-        userDetails[0].access_token = accessToken;
+        delete userDetails.password;
+        userDetails.access_token = accessToken;
 
         return {
             message : "Sucess",
@@ -228,4 +230,16 @@ function getIndex(req,res) {
     console.log("ggggggg");
     
     return res.sendFile(path.resolve(__dirname+'/../../../public/index.html'));
+}
+
+function getLoginPage(req,res) {
+    console.log("ggggggg");
+    
+    return res.sendFile(path.resolve(__dirname+'/../../../public/login.html'));
+}
+
+function getSignupPage(req,res) {
+    console.log("ggggggg");
+    
+    return res.sendFile(path.resolve(__dirname+'/../../../public/signup.html'));
 }

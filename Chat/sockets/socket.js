@@ -8,6 +8,7 @@ exports.socketInitialize = function (server) {
     io.on('connection', function (socket) {
 
         socket.on('user-active', function (data) {
+            console.log('active',data)
             userService.verifyUserSession({ access_token: data.access_token }).then((result) => {
                 if (result && result.length) {
                     var socketKey = result[0].user_id;
@@ -20,17 +21,16 @@ exports.socketInitialize = function (server) {
 
         socket.on('send-message', function (data) {
             userService.verifyUserSession({ access_token: data.access_token }).then((result) => {
+                console.log("dddddddddddddddd",data.to_user_id);
                 if (result && result.length) {
+                    console.log("rrrr==",JSON.stringify(result));
                     delete data.access_token;
                     data.form_user_id = result[0].user_id;
                     socketService.get_redis_client_users(data.to_user_id + '*', function (userSockets) {
+                        console.log("sockets==",JSON.stringify(userSockets));
                         if(userSockets && userSockets.length) {
                             userSockets.forEach(function (sockets) {
-                                var response = {
-                                    "socket_id": socketService.getSocketID(sockets),
-                                    "response": data
-                                };
-                                socket.emit('receive-message', response);
+                                socket.to(socketService.getSocketID(sockets)).emit('receive-message', data);
                             });
                         }
                     });

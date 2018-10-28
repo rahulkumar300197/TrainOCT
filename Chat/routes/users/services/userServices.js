@@ -89,13 +89,14 @@ function sendMessage(opts) {
 
 function getAllMessages(opts) {
     return new Promise((resolve, reject) => {
-        var values = [opts.user_id];
-        var query  = "SELECT user_messages.`id`, user_messages.`message`, user_messages.`sender_id`, user.`name`, " +
+        var values = [opts.user_id,opts.user_id];
+        var query  = "SELECT user_messages.`id`, user_messages.`message`, user_messages.`sender_id`, user.`name`, user_messages.`user_id`, " +
         "user.`user_name` FROM `tb_user_messages` user_messages LEFT JOIN `tb_users` user ON user_messages.`sender_id` " +
-        "= user.`user_id` WHERE user_messages.`user_id` = ? ORDER BY user_messages.`sender_id` ASC";
+        "= user.`user_id` WHERE user_messages.`user_id` = ? OR user_messages.`sender_id` = ? ORDER BY user_messages.`id` ASC";
         dbHandler.mysqlQueryPromise(query, values).then((result) => {
             resolve(result);
         }, (error) => {
+            console.log("eeeee",error)
             reject(error);
         });
     });

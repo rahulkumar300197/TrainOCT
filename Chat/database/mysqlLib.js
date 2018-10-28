@@ -30,9 +30,9 @@ function mysqlQueryPromise(queryString, params) {
       if (sqlError || !sqlResult) {
         if (sqlError) {
           if (sqlError.code === 'ER_LOCK_DEADLOCK' || sqlError.code === 'ER_QUERY_INTERRUPTED') {
-            setTimeout(module.exports.mysqlQueryPromise.bind(null, apiReference, event, queryString, params), 50);
+            setTimeout(module.exports.mysqlQueryPromise.bind(queryString, params), 50);
           } else {
-            return reject({ERROR: sqlError, QUERY: query.sql, EVENT: event});
+            return reject({ERROR: sqlError, QUERY: query.sql});
           }
         }
       }

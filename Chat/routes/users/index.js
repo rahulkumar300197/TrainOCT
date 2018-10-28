@@ -11,5 +11,7 @@ router.post('/accessTokenLogin',userValidator.accessTokenLogin, userControler.ac
 router.post('/getAllMessages',userValidator.getAllMessages, userControler.getAllMessages);
 router.post('/getAllUsers',userValidator.getAllUsers, userControler.getAllUsers);
 router.get('/index',userControler.getIndex);
+router.get('/login/page',userControler.getLoginPage);
+router.get('/signup/page',userControler.getSignupPage);
 
 module.exports = router;

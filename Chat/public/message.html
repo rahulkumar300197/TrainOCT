@@ -66,7 +66,7 @@
 
 <body>
     <h3 id="un"></h3>
-    <ul id="out-messages" align='right'></ul>
+    <ul id="out-messages"></ul>
     <ul id="in-messages"></ul>
     <form action="">
         <input id="m" autocomplete="off" /><button>Send</button>
@@ -74,21 +74,65 @@
 
     <script src="/socket.io/socket.io.js"></script>
     <script src="https://code.jquery.com/jquery-1.11.1.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/2.2.2/jquery.min.js"> </script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/js/bootstrap.min.js"></script>
+
     <script>
         var socket = io();
+        $.ajax({
+            url: window.location.origin + "/users//getAllMessages",
+            type: "POST",
+            headers: {
+                "Content-Type": "application/json"
+            },
+            data: JSON.stringify({
+                access_token: JSON.parse(localStorage.getItem('user-data')).access_token
+            }),
+            dataType: "json"
+        }).success(function (data) {
+            var body = data; //JSON.parse(data);
+            if (body.status == 200) {
+                localStorage.setItem('user-messages', JSON.stringify(body.data));
+                if(localStorage.getItem('current-user')) {
+                    body.data.forEach(element => {
+                        if(element.user_id == localStorage.getItem('current-user') ) {
+                            $('#out-messages').append($('<li>').text(element.message));
+                        }
+                        else if(element.sender_id == localStorage.getItem('current-user')) {
+                            $('#in-messages').append($('<li>').text(element.message));
+                        }
+                    });
+                }
+            }
+            else {
+                alert(body.message);
+            }
+        }).error(function (err) {
+            var myVar;
+            myVar = setTimeout(errorPage, 3000);
+            function errorPage() {
+                window.location.replace(window.location.origin + "/error.html");
+            }
+        })
         $(function () {
             $('form').submit(function () {
-                socket.emit('',  + " : " + $('#m').val());
+                console.log("===",$('#m').val());
                 $('#out-messages').append($('<li>').text($('#m').val()));
+                var messageData = {
+                    access_token: JSON.parse(localStorage.getItem('user-data')).access_token,
+                    to_user_id: JSON.parse(localStorage.getItem('user-list'))[localStorage.getItem('current-user')].user_id,
+                    message: $('#m').val() 
+                }
+                socket.emit('send-message',messageData);
                 $('#m').val('');
                 return false;
             });
 
-            socket.on('', function(data) {
-            });
-
-            socket.on('', function (data) {
-                $('#in-messages').append($('<li>').text(msg));
+            socket.on('receive-message', function (data) {
+                console.log("message recieved====",data);
+                $('#in-messages').append($('<li>').text(data.message));
+                data.access_token = JSON.parse(localStorage.getItem('user-data')).access_token;    
+                socket.emit(data);    
             });
         });
 

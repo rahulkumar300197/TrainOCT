@@ -1,0 +1,103 @@
+<!doctype html>
+<html>
+
+<head>
+    <title>Socket.IO chat</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font: 13px Helvetica, Arial;
+        }
+
+        form {
+            background: #000;
+            padding: 3px;
+            position: fixed;
+            bottom: 0;
+            width: 100%;
+        }
+
+        form input {
+            border: 0;
+            padding: 10px;
+            width: 90%;
+            margin-right: .5%;
+        }
+
+        form button {
+            width: 9%;
+            background: rgb(130, 224, 255);
+            border: none;
+            padding: 10px;
+        }
+
+        #user {
+            list-style-type: none;
+            margin: 0;
+            padding: 0;
+        }
+
+        #user li {
+            padding: 5px 10px;
+            text-align: right;
+        }
+    </style>
+
+</head>
+
+<body>
+    <h3 id="un"></h3>
+    <ul id="user"></ul>
+
+    <script src="/socket.io/socket.io.js"></script>
+    <script src="https://code.jquery.com/jquery-1.11.1.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/2.2.2/jquery.min.js"> </script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/js/bootstrap.min.js"></script>
+
+    <script>
+        $.ajax({
+            url: window.location.origin + "/users//getAllUsers",
+            type: "POST",
+            headers: {
+                "Content-Type": "application/json"
+            },
+            data: JSON.stringify({
+                access_token: JSON.parse(localStorage.getItem('user-data')).access_token
+            }),
+            dataType: "json"
+        }).success(function (data) {
+            $('#submit').attr('disabled', false);
+            var body = data; //JSON.parse(data);
+            if (body.status == 200) {
+                localStorage.setItem('user-list', JSON.stringify(body.data));
+                var i=0;
+                for(let i=0;i<body.data.length;i++) {
+                    $('#user').append($('<li>').text(body.data[i].name));
+                    document.getElementById('user').children[i].onclick = function () {
+                        console.log(i);
+                        localStorage.setItem('current-user', i);
+                        parent.location.reload(); 
+                    }
+                }
+            }
+            else {
+                alert(body.message);
+            }
+        }).error(function (err) {
+            var myVar;
+            myVar = setTimeout(errorPage, 3000);
+            function errorPage() {
+                window.location.replace(window.location.origin + "/error.html");
+            }
+        });
+
+    </script>
+
+</body>
+
+</html>

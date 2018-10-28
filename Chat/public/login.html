@@ -1,0 +1,353 @@
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/2.2.2/jquery.min.js"> </script>
+<script src="https://js.braintreegateway.com/web/3.9.0/js/hosted-fields.min.js"></script>
+
+<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css">
+<style>
+    body {
+        background-color: #fff;
+    }
+
+    .panel {
+        width: 80%;
+        margin: 2em auto;
+    }
+
+    .bootstrap-basic {
+        background: white;
+    }
+
+    .panel-body {
+        width: 90%;
+        margin: 2em auto;
+    }
+
+    #loader {
+        position: absolute;
+        left: 50%;
+        top: 50%;
+        z-index: 1001;
+        width: 50px;
+        height: 50px;
+        margin: -25px 0 0 -25px;
+        border: 6px solid #f3f3f3;
+        border-radius: 50%;
+        border-top: 6px solid #3498db;
+        -webkit-animation: spin 2s linear infinite;
+        animation: spin 2s linear infinite;
+    }
+
+    @-webkit-keyframes spin {
+        0% { -webkit-transform: rotate(0deg); }
+        100% { -webkit-transform: rotate(360deg); }
+    }
+
+    @keyframes spin {
+        0% { transform: rotate(0deg); }
+        100% { transform: rotate(360deg); }
+    }
+    .modal-backdrop{
+        position: fixed;
+        top: 0;
+        right: 0;
+        bottom: 0;
+        left: 0;
+        background-color: rgba(0,0,0,0.7);
+        z-index: 990;
+    }
+
+    .helper-text {
+        color: #8A6D3B;
+        font-size: 12px;
+        margin-top: 5px;
+        height: 12px;
+        display: block;
+    }
+
+    /* Braintree Hosted Fields styling classes*/
+    .braintree-hosted-fields-focused {
+        border: 1px solid #0275d8;
+        box-shadow: inset 0 1px 1px rgba(0, 0, 0, .075), 0 0 8px rgba(102, 175, 233, .6);
+    }
+
+    .braintree-hosted-fields-focused.focused-invalid {
+        border: 1px solid #ebcccc;
+        box-shadow: inset 0 1px 1px rgba(0, 0, 0, .075), 0 0 8px rgba(100, 100, 0, .6);
+    }
+
+    .img-container {
+        position: absolute;
+        top: 50%;
+        left: 50%;
+    }
+
+    .img-container > img {
+        margin-top:-50%;
+        margin-left:-50%;
+    }
+
+    @media (max-width: 670px) {
+        .form-group {
+            width: 100%;
+        }
+
+        .btn {
+            white-space: normal;
+        }
+    }
+
+    .has-error,
+    .has-error .help-block,
+    .has-error .form-control {
+        border : #a94442 1px solid
+    }
+
+    .error_span {
+        color:#a94442;
+        font-size :12px;
+    }
+
+    .invisible_custom {
+        display : none;
+    }
+
+    .visible_custom {
+        disblay : block;
+    }
+</style>
+<script type="text/javascript">
+    function isNumberKey(evt)
+    {
+        var cardNUmber = $('#card-number');
+        if(cardNUmber.val().length>16){
+            return false;
+        }
+//       // cardNUmber.payform('formatCardNumber');
+//        if ($.payform.validateCardNumber(cardNUmber.val()) == false) {
+//            cardNUmber.addClass('has-error');
+//        } else {
+//            cardNUmber.removeClass('has-error');
+//            cardNUmber.addClass('has-success');
+//        }
+        var charCode = (evt.which) ? evt.which : evt.keyCode;
+        if (charCode != 46 && charCode > 31
+                && (charCode < 48 || charCode > 57))
+            return false;
+
+        return true;
+    }
+
+    function isNumberKey2(evt)
+    {
+        var charCode = (evt.which) ? evt.which : evt.keyCode;
+        if (charCode != 46 && charCode > 31
+                && (charCode < 48 || charCode > 57))
+            return false;
+
+        return true;
+    }
+
+    function isNumberKey3(evt)
+    {
+        var charCode = (evt.which) ? evt.which : evt.keyCode;
+        if (charCode != 46 && charCode > 31
+                && (charCode < 48 || charCode > 57))
+            return false;
+
+        return true;
+    }
+</script>
+
+
+<!--<center><img src = "ring.gif" class="img-container"></center>-->
+<!-- Bootstrap inspired Braintree Hosted Fields example -->
+<div class="panel panel-default bootstrap-basic" id = "top">
+    <div class="alert alert-success invisible_custom" id = "success-toast">
+        <strong>Success!</strong> You have successfully added the card.
+    </div>
+    <div class="alert alert-danger invisible_custom" id="failure-toast">
+        <strong>Failure!</strong> Error in adding card. Please enter valid card details.
+    </div>
+    <div class="panel-heading">
+        <h3 class="panel-title">Enter Signup Details</h3>
+    </div>
+    <form class="panel-body" id="payment-form">
+        <div class="row">
+            <div class="form-group col-xs-6">
+                <label class="control-label">User Name</label>
+                <!--  Hosted Fields div container -->
+                <input type="tel" class="form-control" id="user-name" placeholder=""  maxlength="20">
+
+            </div>
+            <div class="form-group col-xs-6">
+                <label class="control-label">Password</label>
+                <!--  Hosted Fields div container -->
+                <input type="password" class="form-control" id="password" placeholder=""  maxlength="20">
+            </div>
+        </div>
+
+
+        <button value="submit" id="submit"  class="btn btn-success btn-lg center-block">Sign  <span id="card-type">Up</span>
+        </button>
+    </form>
+    <div id="loader"></div>
+</div>
+</body>
+
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/2.2.2/jquery.min.js"> </script>
+<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/js/bootstrap.min.js"></script>
+<script src="/socket.io/socket.io.js"></script>
+
+
+
+<script>
+    var socket = io();
+    var disable = true;
+    document.getElementById("loader").style.display = "none";
+
+    function validate(evt) {
+        var theEvent = evt || window.event;
+        var key = theEvent.keyCode || theEvent.which;
+        key = String.fromCharCode( key );
+        var regex = /[0-9]|\./;
+        if( !regex.test(key) ) {
+            theEvent.returnValue = false;
+            if(theEvent.preventDefault) theEvent.preventDefault();
+        }
+    }
+
+    function getParameterByName(name, url) {
+        if (!url) {
+            url = window.location.href;
+        }
+        name = name.replace(/[\[\]]/g, "\\$&");
+        var regex = new RegExp("[?&]" + name + "(=([^&#]*)|&|#|$)"),
+                results = regex.exec(url);
+        if (!results) return null;
+        if (!results[2]) return '';
+        return decodeURIComponent(results[2].replace(/\+/g, " "));
+    }
+
+    var form = $('#payment-form');
+    $('input', form).on('focus', function(){
+        $(this).parent().find('.error_span').remove();
+        $(this).removeClass("has-error");
+    });
+    form.submit(function(event) {
+        console.log($("#user-name").val(),'=====',$("#password").val())
+        event.preventDefault();
+//        window.location.href="#top";
+        // Disable the submit button to prevent repeated clicks:
+        var error_message_span = "<span class ='error_span'>* This field is required. </span>"
+        form.find('.submit').prop('disabled', true);
+
+        if($("#user-name").val() === ""){
+            if(!$("#user-name").hasClass("has-error")) {
+
+            }
+        }
+
+        else if($("#password").val() === "") {
+            if(!$("#password").hasClass("has-error")) {
+                $("#password").addClass("has-error");
+                $("#password").parent().append(error_message_span)
+            }
+
+        }
+
+        else {
+            if(disable){
+                disable = false;
+                $('#submit').attr('disabled',true);
+                var myVar;
+                myVar = setTimeout(showPage);
+
+                function showPage() {
+                    document.getElementById("loader").style.display = "block";
+                    myVar = setTimeout(errorPage, 3000);
+
+                }
+                function errorPage(){
+                    document.getElementById("loader").style.display = "none";
+                    dis = setTimeout(enableButton,2000);
+                }
+                function enableButton() {
+                    $('#submit').attr('disabled',false);
+                }
+                $.ajax({
+                            url: window.location.origin + "/users/login",
+                            type: "POST",
+                            headers: {
+                                "Content-Type": "application/json"
+                            },
+                            data: JSON.stringify({
+                                //access_token: getParameterByName('access_token'),
+                                //app_device_type: getParameterByName('app_device_type'),
+                                user_name: $("#user-name").val(),
+                                password: $("#password").val()
+                            }),
+                            dataType: "json"
+                        }).success(function (data) {
+                            $('#submit').attr('disabled',false);
+                            var body = data; //JSON.parse(data);
+                            if (body.status == 200) {
+//                            $('#failure-toast').hide();
+//                            $('#success-toast').show()
+//                            setTimeout(function() {
+//                                $('#success-toast').hide();
+//                            },5000);
+                                var myVar;
+                                myVar = setTimeout(showPage, 3000);
+                                localStorage.setItem('user-data', JSON.stringify(body.data));
+                                socket.emit('user-active',{access_token: body.data.access_token});
+
+                                function showPage() {
+
+                                    document.getElementById("loader").style.display = "none";
+                                    window.location.replace(window.location.origin + "/users/index");
+                                }
+                            }
+                            else {
+                                var myVar;
+                                myVar = setTimeout(showPage, 3000);
+
+                                function showPage() {
+
+                                    document.getElementById("loader").style.display = "none";
+                                    window.location.replace(window.location.origin + "/error.html");
+
+                                }
+                            }
+                        }).error(function(err) {
+                            $('#submit').attr('disabled',false);
+                            var myVar;
+                            myVar = setTimeout(showPage, 3000);
+
+                            function showPage() {
+
+                                document.getElementById("loader").style.display = "none";
+                                setTimeout(errorPage,500);
+                            }
+                            function errorPage(){
+                                window.location.replace(window.location.origin + "/error.html");
+                            }
+
+
+                        })
+                        setTimeout(function () {
+                            $('#submit').attr('disabled',false);
+                        },5000);
+            }
+
+
+
+        }
+        // Prevent the form from being submitted:
+        return false;
+    });
+
+
+
+</script>
+
+<body>
