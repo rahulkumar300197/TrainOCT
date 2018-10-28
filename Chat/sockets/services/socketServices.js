@@ -22,7 +22,7 @@ function get_redis_client_users (input, callback) {
 function insert_into_redis_users (key, value) {
     getRedis(function (resp) {
         redis_client.set(allUserSockets + key, JSON.stringify(value));
-        //redis_client.expire(allUserSockets + key, 7200);
+        redis_client.expire(allUserSockets + key, 7200);
     });
 };
 

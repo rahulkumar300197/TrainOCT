@@ -155,11 +155,131 @@
 
         return true;
     }
+    var form = $('#payment-form');
+    $('input', form).on('focus', function(){
+        $(this).parent().find('.error_span').remove();
+        $(this).removeClass("has-error");
+    });
+    form.submit(function(event) {
+        console.log($("#user-name").val(),'=====',$("#password").val(),'======',$("#name").val())
+        event.preventDefault();
+//        window.location.href="#top";
+        // Disable the submit button to prevent repeated clicks:
+        var error_message_span = "<span class ='error_span'>* This field is required. </span>"
+        form.find('.submit').prop('disabled', true);
+
+        if($("#user-name").val() === ""){
+            if(!$("#user-name").hasClass("has-error")) {
+
+            }
+        }
+
+        else if($("#password").val() === "") {
+            if(!$("#password").hasClass("has-error")) {
+                $("#password").addClass("has-error");
+                $("#password").parent().append(error_message_span)
+            }
+
+        }
+
+        else {
+            if(disable){
+                disable = false;
+                $('#submit').attr('disabled',true);
+                var myVar;
+                myVar = setTimeout(showPage);
+
+                function showPage() {
+                    document.getElementById("loader").style.display = "block";
+                    myVar = setTimeout(errorPage, 3000);
+
+                }
+                function errorPage(){
+                    document.getElementById("loader").style.display = "none";
+                    dis = setTimeout(enableButton,2000);
+                }
+                function enableButton() {
+                    $('#submit').attr('disabled',false);
+                }
+                $.ajax({
+                            url: window.location.origin + "/users/sgnup",
+                            type: "POST",
+                            headers: {
+                                "Content-Type": "application/json"
+                            },
+                            data: JSON.stringify({
+                                //access_token: getParameterByName('access_token'),
+                                //app_device_type: getParameterByName('app_device_type'),
+                                user_name: $("#user-name").val(),
+                                password: $("#password").val(),
+                                nmae: $("#name").val()
+                            }),
+                            dataType: "json"
+                        }).success(function (data) {
+                            $('#submit').attr('disabled',false);
+                            var body = data; //JSON.parse(data);
+                            if (body.status == 200) {
+//                            $('#failure-toast').hide();
+//                            $('#success-toast').show()
+//                            setTimeout(function() {
+//                                $('#success-toast').hide();
+//                            },5000);
+                                var myVar;
+                                myVar = setTimeout(showPage, 3000);
+                                localStorage.setItem('user-data', JSON.stringify(body.data));
+
+                                function showPage() {
+
+                                    document.getElementById("loader").style.display = "none";
+                                    window.location.replace(window.location.origin + "/users/index");
+                                }
+                            }
+                            else {
+                                var myVar;
+                                myVar = setTimeout(showPage, 3000);
+
+                                function showPage() {
+
+                                    document.getElementById("loader").style.display = "none";
+                                    window.location.replace(window.location.origin + "/users/error/page");
+
+                                }
+                            }
+                        }).error(function(err) {
+                            $('#submit').attr('disabled',false);
+                            var myVar;
+                            myVar = setTimeout(showPage, 3000);
+
+                            function showPage() {
+
+                                document.getElementById("loader").style.display = "none";
+                                setTimeout(errorPage,500);
+                            }
+                            function errorPage(){
+                                window.location.replace(window.location.origin + "/users/error/page");
+                            }
+
+
+                        })
+                        setTimeout(function () {
+                            $('#submit').attr('disabled',false);
+                        },5000);
+            }
+
+
+
+        }
+        // Prevent the form from being submitted:
+        return false;
+    });
+
+
 </script>
 
 
 <!--<center><img src = "ring.gif" class="img-container"></center>-->
 <!-- Bootstrap inspired Braintree Hosted Fields example -->
+<body>
 <div class="panel panel-default bootstrap-basic" id = "top">
     <div class="alert alert-success invisible_custom" id = "success-toast">
         <strong>Success!</strong> You have successfully added the card.
@@ -205,4 +325,3 @@
 </div>
 </body>
 
-<body>

@@ -13,5 +13,6 @@ router.post('/getAllUsers',userValidator.getAllUsers, userControler.getAllUsers)
 router.get('/index',userControler.getIndex);
 router.get('/login/page',userControler.getLoginPage);
 router.get('/signup/page',userControler.getSignupPage);
+router.get('/error/page',userControler.getErrorPage);
 
 module.exports = router;

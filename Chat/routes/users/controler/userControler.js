@@ -16,6 +16,7 @@ exports.getAllUsers                =            getAllUsers;
 exports.getIndex                   =            getIndex;
 exports.getSignupPage              =            getSignupPage;
 exports.getLoginPage               =            getLoginPage;
+exports.getErrorPage               =            getErrorPage;
 
 function userLogin(req, res) {
     Promise.coroutine(function* () {
@@ -163,7 +164,18 @@ function accessTokenLogin(req, res) {
 
 function getAllMessages(req, res) {
     Promise.coroutine(function* () {
-        var allMessagesOptions = { access_token: req.body.access_token };
+        console.log("===================",req.body.access_token);
+        var verifyUserSessionOptions = { access_token: req.body.access_token };
+        var userDetails = yield userServices.verifyUserSession(verifyUserSessionOptions);
+
+        if (_.isEmpty(userDetails)) {
+            return {
+                message : "Invalid Access Token",
+                status  : 100
+            };
+        }
+
+        var allMessagesOptions = { user_id: userDetails[0].user_id };
         var allMessages = yield userServices.getAllMessages(allMessagesOptions);
 
         if (_.isEmpty(allMessages)) {
@@ -226,20 +238,18 @@ function getAllUsers(req, res) {
     });
 }
 
-function getIndex(req,res) {
-    console.log("ggggggg");
-    
+function getIndex(req,res) {    
     return res.sendFile(path.resolve(__dirname+'/../../../public/index.html'));
 }
 
-function getLoginPage(req,res) {
-    console.log("ggggggg");
-    
+function getLoginPage(req,res) {    
     return res.sendFile(path.resolve(__dirname+'/../../../public/login.html'));
 }
 
-function getSignupPage(req,res) {
-    console.log("ggggggg");
-    
+function getSignupPage(req,res) {    
     return res.sendFile(path.resolve(__dirname+'/../../../public/signup.html'));
+}
+
+function getErrorPage(req,res) {    
+    return res.sendFile(path.resolve(__dirname+'/../../../public/error.html'));
 }

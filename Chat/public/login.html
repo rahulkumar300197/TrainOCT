@@ -281,25 +281,17 @@
                                 "Content-Type": "application/json"
                             },
                             data: JSON.stringify({
-                                //access_token: getParameterByName('access_token'),
-                                //app_device_type: getParameterByName('app_device_type'),
                                 user_name: $("#user-name").val(),
                                 password: $("#password").val()
                             }),
                             dataType: "json"
                         }).success(function (data) {
                             $('#submit').attr('disabled',false);
-                            var body = data; //JSON.parse(data);
+                            var body = data;
                             if (body.status == 200) {
-//                            $('#failure-toast').hide();
-//                            $('#success-toast').show()
-//                            setTimeout(function() {
-//                                $('#success-toast').hide();
-//                            },5000);
                                 var myVar;
                                 myVar = setTimeout(showPage, 3000);
                                 localStorage.setItem('user-data', JSON.stringify(body.data));
-                                socket.emit('user-active',{access_token: body.data.access_token});
 
                                 function showPage() {
 
@@ -314,7 +306,7 @@
                                 function showPage() {
 
                                     document.getElementById("loader").style.display = "none";
-                                    window.location.replace(window.location.origin + "/error.html");
+                                    window.location.replace(window.location.origin + "/users/error/page");
 
                                 }
                             }
@@ -329,7 +321,7 @@
                                 setTimeout(errorPage,500);
                             }
                             function errorPage(){
-                                window.location.replace(window.location.origin + "/error.html");
+                                window.location.replace(window.location.origin + "/users/error/page");
                             }
 
 
