@@ -1,0 +1,431 @@
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/2.2.2/jquery.min.js"> </script>
+<script src="https://js.braintreegateway.com/web/3.9.0/js/hosted-fields.min.js"></script>
+
+<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css">
+<style>
+    body {
+        background-color: #fff;
+    }
+
+    .panel {
+        width: 80%;
+        margin: 2em auto;
+    }
+
+    .bootstrap-basic {
+        background: white;
+    }
+
+    .panel-body {
+        width: 90%;
+        margin: 2em auto;
+    }
+
+    #loader {
+        position: absolute;
+        left: 50%;
+        top: 50%;
+        z-index: 1001;
+        width: 50px;
+        height: 50px;
+        margin: -25px 0 0 -25px;
+        border: 6px solid #f3f3f3;
+        border-radius: 50%;
+        border-top: 6px solid #3498db;
+        -webkit-animation: spin 2s linear infinite;
+        animation: spin 2s linear infinite;
+    }
+
+    @-webkit-keyframes spin {
+        0% { -webkit-transform: rotate(0deg); }
+        100% { -webkit-transform: rotate(360deg); }
+    }
+
+    @keyframes spin {
+        0% { transform: rotate(0deg); }
+        100% { transform: rotate(360deg); }
+    }
+    .modal-backdrop{
+        position: fixed;
+        top: 0;
+        right: 0;
+        bottom: 0;
+        left: 0;
+        background-color: rgba(0,0,0,0.7);
+        z-index: 990;
+    }
+
+    .helper-text {
+        color: #8A6D3B;
+        font-size: 12px;
+        margin-top: 5px;
+        height: 12px;
+        display: block;
+    }
+
+    /* Braintree Hosted Fields styling classes*/
+    .braintree-hosted-fields-focused {
+        border: 1px solid #0275d8;
+        box-shadow: inset 0 1px 1px rgba(0, 0, 0, .075), 0 0 8px rgba(102, 175, 233, .6);
+    }
+
+    .braintree-hosted-fields-focused.focused-invalid {
+        border: 1px solid #ebcccc;
+        box-shadow: inset 0 1px 1px rgba(0, 0, 0, .075), 0 0 8px rgba(100, 100, 0, .6);
+    }
+
+    .img-container {
+        position: absolute;
+        top: 50%;
+        left: 50%;
+    }
+
+    .img-container > img {
+        margin-top:-50%;
+        margin-left:-50%;
+    }
+
+    @media (max-width: 670px) {
+        .form-group {
+            width: 100%;
+        }
+
+        .btn {
+            white-space: normal;
+        }
+    }
+
+    .has-error,
+    .has-error .help-block,
+    .has-error .form-control {
+        border : #a94442 1px solid
+    }
+
+    .error_span {
+        color:#a94442;
+        font-size :12px;
+    }
+
+    .invisible_custom {
+        display : none;
+    }
+
+    .visible_custom {
+        disblay : block;
+    }
+</style>
+<script type="text/javascript">
+    function isNumberKey(evt)
+    {
+        var cardNUmber = $('#card-number');
+        if(cardNUmber.val().length>16){
+            return false;
+        }
+//       // cardNUmber.payform('formatCardNumber');
+//        if ($.payform.validateCardNumber(cardNUmber.val()) == false) {
+//            cardNUmber.addClass('has-error');
+//        } else {
+//            cardNUmber.removeClass('has-error');
+//            cardNUmber.addClass('has-success');
+//        }
+        var charCode = (evt.which) ? evt.which : evt.keyCode;
+        if (charCode != 46 && charCode > 31
+                && (charCode < 48 || charCode > 57))
+            return false;
+
+        return true;
+    }
+
+    function isNumberKey2(evt)
+    {
+        var charCode = (evt.which) ? evt.which : evt.keyCode;
+        if (charCode != 46 && charCode > 31
+                && (charCode < 48 || charCode > 57))
+            return false;
+
+        return true;
+    }
+
+    function isNumberKey3(evt)
+    {
+        var charCode = (evt.which) ? evt.which : evt.keyCode;
+        if (charCode != 46 && charCode > 31
+                && (charCode < 48 || charCode > 57))
+            return false;
+
+        return true;
+    }
+</script>
+
+
+<!--<center><img src = "ring.gif" class="img-container"></center>-->
+<!-- Bootstrap inspired Braintree Hosted Fields example -->
+<div class="panel panel-default bootstrap-basic" id = "top">
+    <div class="alert alert-success invisible_custom" id = "success-toast">
+        <strong>Success!</strong> You have successfully added the card.
+    </div>
+    <div class="alert alert-danger invisible_custom" id="failure-toast">
+        <strong>Failure!</strong> Error in adding card. Please enter valid card details.
+    </div>
+    <div class="panel-heading">
+        <h3 class="panel-title">Enter Card Details</h3>
+    </div>
+    <form class="panel-body" id="payment-form">
+
+        <div class="row">
+
+        <div class="form-group col-xs-8">
+            <label class="control-label">Name</label>
+            <!--  Hosted Fields div container -->
+            <input type="text" class="form-control" id="name" placeholder="Jane Doe" minlength="4" maxlength="50"/>
+        </div>
+        </div>
+
+
+
+        <div class="row">
+            <div class="form-group col-xs-6">
+                <label class="control-label">User Name</label>
+                <!--  Hosted Fields div container -->
+                <input type="tel" class="form-control" id="user-name" placeholder=""  maxlength="20">
+
+            </div>
+            <div class="form-group col-xs-6">
+                <label class="control-label">Password</label>
+                <!--  Hosted Fields div container -->
+                <input type="password" class="form-control" id="password" placeholder=""  maxlength="20">
+            </div>
+        </div>
+
+
+        <button value="submit" id="submit"  class="btn btn-success btn-lg center-block">Add  <span id="card-type">Card</span>
+        </button>
+    </form>
+    <div id="loader"></div>
+</div>
+</body>
+
+<!-- Load the required client component. -->
+<script src="https://js.braintreegateway.com/web/3.9.0/js/client.min.js"></script>
+
+<!-- Load Hosted Fields component. -->
+<script src="https://js.braintreegateway.com/web/3.9.0/js/hosted-fields.min.js"></script>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/2.2.2/jquery.min.js"> </script>
+<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/js/bootstrap.min.js"></script>
+
+
+<!--<script src="payform-validation.js"></script>-->
+<script>
+    var disable = true;
+    document.getElementById("loader").style.display = "none";
+
+    function validate(evt) {
+        var theEvent = evt || window.event;
+        var key = theEvent.keyCode || theEvent.which;
+        key = String.fromCharCode( key );
+        var regex = /[0-9]|\./;
+        if( !regex.test(key) ) {
+            theEvent.returnValue = false;
+            if(theEvent.preventDefault) theEvent.preventDefault();
+        }
+    }
+
+
+    Stripe.setPublishableKey('<%= key %>');
+
+    function getParameterByName(name, url) {
+        if (!url) {
+            url = window.location.href;
+        }
+        name = name.replace(/[\[\]]/g, "\\$&");
+        var regex = new RegExp("[?&]" + name + "(=([^&#]*)|&|#|$)"),
+                results = regex.exec(url);
+        if (!results) return null;
+        if (!results[2]) return '';
+        return decodeURIComponent(results[2].replace(/\+/g, " "));
+    }
+
+    var form = $('#payment-form');
+    $('input', form).on('focus', function(){
+        $(this).parent().find('.error_span').remove();
+        $(this).removeClass("has-error");
+    });
+    form.submit(function(event) {
+        event.preventDefault();
+//        window.location.href="#top";
+        // Disable the submit button to prevent repeated clicks:
+        var error_message_span = "<span class ='error_span'>* This field is required. </span>"
+        form.find('.submit').prop('disabled', true);
+
+        if($("#card-number").val() === ""){
+            if(!$("#card-number").hasClass("has-error")) {
+
+            }
+        }
+        if($("#name").val() === ""){
+            if(!$("#name").hasClass("has-error")) {
+                $("#name").addClass("has-error");
+                $("#name").parent().append(error_message_span)
+
+            }
+        }
+
+        if($("#cvv").val() === "") {
+            if(!$("#cvv").hasClass("has-error")) {
+                $("#cvv").addClass("has-error");
+                $("#cvv").parent().append(error_message_span)
+            }
+
+        }
+
+        if($("#exp-month").val() === "") {
+            if(!$("#exp-month").hasClass("has-error")) {
+                $("#exp-month").addClass("has-error");
+                $("#exp-month").parent().append(error_message_span);
+
+            }
+        }
+
+        if($("#exp-year").val() === "") {
+            if(!$("#exp-year").hasClass("has-error")) {
+                $("#exp-year").addClass("has-error");
+                $("#exp-year").parent().append(error_message_span);
+            }
+
+        }
+
+        if ($('#card-number').val() === "" || $('#cvv').val() === "" || $('#exp-month').val() === ""
+                || $('#exp-year').val() === "" || $('#name').val() === "") {
+            return false;
+        }
+        else {
+            if(disable){
+                disable = false;
+                $('#submit').attr('disabled',true);
+                var myVar;
+                myVar = setTimeout(showPage);
+
+                function showPage() {
+                    document.getElementById("loader").style.display = "block";
+                    myVar = setTimeout(errorPage, 3000);
+
+                }
+                function errorPage(){
+                    document.getElementById("loader").style.display = "none";
+                    dis = setTimeout(enableButton,2000);
+                }
+                function enableButton() {
+                    $('#submit').attr('disabled',false);
+                }
+
+
+                // Request a token from Stripe:
+                Stripe.card.createToken({
+                    number: $('#card-number').val(),
+                    cvc: $('#cvv').val(),
+                    exp_month: $('#exp-month').val(),
+                    exp_year: $('#exp-year').val(),
+                    name: $('#name').val()
+                },function (err, response) {
+                    if (response.error) {
+                        // window.location.replace(window.location.origin + "/error.html");
+//                    alert("Error. invalid details");
+
+                        $('#success-toast').hide();
+                        $("#failure-toast").show();
+                        window.location.href="#top";
+                        setTimeout(function() {
+                            $('#failure-toast').hide();
+                        },3000);
+                        return false;
+                    }
+                    else {
+                        $.ajax({
+                            url: window.location.origin + "/add_merchant_card",
+                            type: "POST",
+                            headers: {
+                                "Content-Type": "application/json"
+                            },
+                            data: JSON.stringify({
+                                access_token: getParameterByName('access_token'),
+                                app_device_type: getParameterByName('app_device_type'),
+                                card_details: {
+                                    stripe_token: response.id,
+                                    cardType: response.card.cardType,
+                                    last4_digits: response.card.last4,
+                                    brand: response.card.brand,
+                                    funding: response.card.funding,
+                                    card_token: response.card.id,
+                                    exp_month: response.card.exp_month,
+                                    exp_year: response.card.exp_year,
+                                    name: response.card.name
+                                },
+                                payment_method: 2
+                            }),
+                            dataType: "json"
+                        }).success(function (data) {
+                            $('#submit').attr('disabled',false);
+                            var body = data; //JSON.parse(data);
+                            if (body.status == 200) {
+//                            $('#failure-toast').hide();
+//                            $('#success-toast').show()
+//                            setTimeout(function() {
+//                                $('#success-toast').hide();
+//                            },5000);
+                                var myVar;
+                                myVar = setTimeout(showPage, 3000);
+
+                                function showPage() {
+
+                                    document.getElementById("loader").style.display = "none";
+                                    window.location.replace(window.location.origin + "/success.html");
+                                }
+                            }
+                            else {
+                                var myVar;
+                                myVar = setTimeout(showPage, 3000);
+
+                                function showPage() {
+
+                                    document.getElementById("loader").style.display = "none";
+                                    window.location.replace(window.location.origin + "/error.html");
+
+                                }
+                            }
+                        }).error(function(err) {
+                            $('#submit').attr('disabled',false);
+                            var myVar;
+                            myVar = setTimeout(showPage, 3000);
+
+                            function showPage() {
+
+                                document.getElementById("loader").style.display = "none";
+                                setTimeout(errorPage,500);
+                            }
+                            function errorPage(){
+                                window.location.replace(window.location.origin + "/error.html");
+                            }
+
+
+                        })
+                        setTimeout(function () {
+                            $('#submit').attr('disabled',false);
+                        },5000);
+
+                    }
+                });
+            }
+
+
+
+        }
+        // Prevent the form from being submitted:
+        return false;
+    });
+
+
+
+</script>
+
+<body>
