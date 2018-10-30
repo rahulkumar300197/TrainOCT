@@ -119,7 +119,7 @@
                 console.log("message recieved====",data);
                 $('#messages').append($('<li>').text(data.message));
                 data.access_token = JSON.parse(localStorage.getItem('user-data')).access_token;    
-                socket.emit(data);    
+                socket.emit('read-message',data);    
             });
         });
 
