@@ -11,3 +11,7 @@ exports.databaseSettings = {
     port              : "6379"
   }
 };
+
+exports.notificationSettings = {
+  fcm_key : ""
+};
